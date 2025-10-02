@@ -18,7 +18,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+      if (
+        formRef.current &&
+        !formRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -50,11 +53,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md mx-auto relative"
+      className="w-full max-w-2xl mx-auto relative"
       ref={formRef}
     >
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <div className="flex-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <input
             ref={inputRef}
             type="text"
@@ -62,37 +70,41 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onFocus={handleInputFocus}
             placeholder={placeholder}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:border-gray-300 transition-all text-lg"
           />
 
           {showDropdown && searchHistory.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 border-b border-gray-200">
-                Historique de recherche
-              </div>
-              {searchHistory.map((historyQuery, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => handleHistoryClick(historyQuery)}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {historyQuery}
-                </button>
-              ))}
+                  <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Historique de recherche
+                  </span>
+                </div>
+              </div>
+              <div className="py-1">
+                {searchHistory.map((historyQuery, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleHistoryClick(historyQuery)}
+                    className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all flex items-center gap-3 text-gray-700 group"
+                  >
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                      <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="flex-1 font-medium">{historyQuery}</span>
+                    <svg className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -100,7 +112,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <button
           type="submit"
           disabled={!query.trim()}
-          className="px-6 py-2 bg-blue-500 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
         >
           Rechercher
         </button>

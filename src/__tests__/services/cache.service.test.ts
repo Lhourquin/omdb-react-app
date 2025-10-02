@@ -155,7 +155,7 @@ describe('Cache Service', () => {
       expect(cache['matrix_page1'].results).toEqual(mockMovies);
     });
 
-    it('should store timestamp', () => {
+    it('should store timestamp and accessOrder', () => {
       const now = Date.now();
       vi.setSystemTime(now);
       
@@ -163,6 +163,8 @@ describe('Cache Service', () => {
       
       const cache = getItem<any>(CACHE_KEY);
       expect(cache['test_page1'].timestamp).toBe(now);
+      expect(cache['test_page1'].accessOrder).toBeDefined();
+      expect(typeof cache['test_page1'].accessOrder).toBe('number');
     });
 
     it('should not cache results exceeding MAX_RESULTS_TO_CACHE', () => {
@@ -226,6 +228,95 @@ describe('Cache Service', () => {
       
       const result = getCachedSearch('test', 1);
       expect(result).toEqual({ results: [], totalResults: 0 });
+    });
+
+    it('should enforce FIFO limit of 5 pages per query', () => {
+      // Ajouter 6 pages pour la même recherche
+      for (let i = 1; i <= 6; i++) {
+        setCachedSearch('batman', i, mockMovies, 60);
+      }
+      
+      const cache = getItem<any>(CACHE_KEY);
+      
+      // La première page (page 1) devrait être supprimée
+      expect(cache['batman_page1']).toBeUndefined();
+      
+      // Les pages 2-6 devraient être présentes
+      expect(cache['batman_page2']).toBeDefined();
+      expect(cache['batman_page3']).toBeDefined();
+      expect(cache['batman_page4']).toBeDefined();
+      expect(cache['batman_page5']).toBeDefined();
+      expect(cache['batman_page6']).toBeDefined();
+    });
+
+    it('should maintain separate FIFO limits for different queries', () => {
+      // Ajouter 5 pages pour "batman"
+      for (let i = 1; i <= 5; i++) {
+        setCachedSearch('batman', i, mockMovies, 50);
+      }
+      
+      // Ajouter 3 pages pour "matrix"
+      for (let i = 1; i <= 3; i++) {
+        setCachedSearch('matrix', i, mockMovies, 30);
+      }
+      
+      const cache = getItem<any>(CACHE_KEY);
+      
+      // Vérifier que batman a 5 pages
+      const batmanPages = Object.keys(cache).filter(k => k.startsWith('batman_page'));
+      expect(batmanPages.length).toBe(5);
+      
+      // Vérifier que matrix a 3 pages
+      const matrixPages = Object.keys(cache).filter(k => k.startsWith('matrix_page'));
+      expect(matrixPages.length).toBe(3);
+    });
+
+    it('should remove oldest page based on accessOrder not timestamp', () => {
+      // Créer des pages avec des timestamps différents
+      vi.setSystemTime(1000);
+      setCachedSearch('test', 1, mockMovies, 50);
+      
+      vi.setSystemTime(2000);
+      setCachedSearch('test', 2, mockMovies, 50);
+      
+      vi.setSystemTime(3000);
+      setCachedSearch('test', 3, mockMovies, 50);
+      
+      vi.setSystemTime(4000);
+      setCachedSearch('test', 4, mockMovies, 50);
+      
+      vi.setSystemTime(5000);
+      setCachedSearch('test', 5, mockMovies, 50);
+      
+      // Accéder à la page 1 pour mettre à jour son timestamp
+      vi.setSystemTime(6000);
+      getCachedSearch('test', 1);
+      
+      // Ajouter une 6ème page
+      vi.setSystemTime(7000);
+      setCachedSearch('test', 6, mockMovies, 50);
+      
+      const cache = getItem<any>(CACHE_KEY);
+      
+      // La page 1 devrait toujours être supprimée malgré son timestamp récent
+      // car elle a le plus petit accessOrder
+      expect(cache['test_page1']).toBeUndefined();
+      expect(cache['test_page6']).toBeDefined();
+    });
+
+    it('should increment accessOrder for each new cache entry', () => {
+      setCachedSearch('test1', 1, mockMovies, 10);
+      setCachedSearch('test2', 1, mockMovies, 10);
+      setCachedSearch('test3', 1, mockMovies, 10);
+      
+      const cache = getItem<any>(CACHE_KEY);
+      
+      const order1 = cache['test1_page1'].accessOrder;
+      const order2 = cache['test2_page1'].accessOrder;
+      const order3 = cache['test3_page1'].accessOrder;
+      
+      expect(order2).toBeGreaterThan(order1);
+      expect(order3).toBeGreaterThan(order2);
     });
   });
 

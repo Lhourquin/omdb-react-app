@@ -7,11 +7,13 @@ import { useLocalStorage } from "../localStorage/useLocalStorage";
 import { MovieNotFoundError } from "../../utils/errors";
 
 const SEARCH_HISTORY_KEY = "searchHistory";
+const LAST_PAGE_KEY = "lastPageByQuery";
 const MAX_HISTORY_SIZE = 10;
 
 export const useMovieSearch = () => {
   const [movies, setMovies] = useState<MovieType[]>([]);
   const [searchHistory, setSearchHistory] = useLocalStorage<string[]>(SEARCH_HISTORY_KEY, []);
+  const [lastPageByQuery, setLastPageByQuery] = useLocalStorage<Record<string, number>>(LAST_PAGE_KEY, {});
   const [isCachedResult, setIsCachedResult] = useState(false);
   const [lastSearchQuery, setLastSearchQuery] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +32,9 @@ export const useMovieSearch = () => {
         setCurrentPage(page);
         setIsCachedResult(true);
         setLastSearchQuery(query);
+
+        // Persister la page courante
+        setLastPageByQuery((prev) => ({ ...prev, [query]: page }));
 
         if (!isInitialLoad) {
           setSearchHistory((prev) => {
@@ -55,6 +60,9 @@ export const useMovieSearch = () => {
         setLastSearchQuery(query);
 
         setCachedSearch(query, page, results, total);
+
+        // Persister la page courante
+        setLastPageByQuery((prev) => ({ ...prev, [query]: page }));
 
         if (!isInitialLoad) {
           setSearchHistory((prev) => {
@@ -82,13 +90,18 @@ export const useMovieSearch = () => {
         }
       }
     },
-    [loader, setSearchHistory]
+    [loader, setSearchHistory, setLastPageByQuery]
   );
 
   const removeFromHistory = useCallback((queryToRemove: string) => {
     setSearchHistory((prev) => prev.filter(q => q !== queryToRemove));
+    setLastPageByQuery((prev) => {
+      const newMap = { ...prev };
+      delete newMap[queryToRemove];
+      return newMap;
+    });
     removeCachedSearch(queryToRemove);
-  }, [setSearchHistory]);
+  }, [setSearchHistory, setLastPageByQuery]);
 
   const goToPage = useCallback(
     (page: number) => {
@@ -102,7 +115,9 @@ export const useMovieSearch = () => {
   useEffect(() => {
     if (searchHistory.length > 0) {
       const lastQuery = searchHistory[0];
-      searchMoviesHook(lastQuery, 1, true);
+      // Récupérer la dernière page consultée pour cette recherche
+      const savedPage = lastPageByQuery[lastQuery] || 1;
+      searchMoviesHook(lastQuery, savedPage, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

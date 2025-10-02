@@ -4,6 +4,7 @@ import type { Movie } from "../types/Movie.type";
 export const CACHE_KEY = "movieSearchCache";
 export const CACHE_EXPIRATION_MS = 1000 * 60 * 60; // 1 heure
 export const MAX_RESULTS_TO_CACHE = 20;
+export const MAX_PAGES_PER_QUERY = 5; // FIFO: max 5 pages par recherche
 
 export interface CacheEntry {
   query: string;
@@ -11,6 +12,7 @@ export interface CacheEntry {
   results: Movie[];
   totalResults: number;
   timestamp: number;
+  accessOrder: number; // Pour FIFO: ordre d'accès
 }
 
 export interface SearchCache {
@@ -39,6 +41,13 @@ export const getCachedSearch = (
     return null;
   }
 
+  // Mettre à jour le timestamp pour refléter l'accès récent
+  cache[key] = {
+    ...entry,
+    timestamp: Date.now(),
+  };
+  setItem(CACHE_KEY, cache);
+
   return {
     results: entry.results,
     totalResults: entry.totalResults,
@@ -56,16 +65,39 @@ export const setCachedSearch = (
   }
 
   const cache = getItem<SearchCache>(CACHE_KEY) || {};
-  const key = getCacheKey(query, page);
+  const normalizedQuery = query.toLowerCase().trim();
+  
+  // Trouver toutes les pages de cette recherche
+  const queryPages = Object.keys(cache).filter(key => 
+    cache[key].query.toLowerCase().trim() === normalizedQuery
+  );
 
+  // FIFO: si on a déjà 5 pages, supprimer la plus ancienne (plus petit accessOrder)
+  if (queryPages.length >= MAX_PAGES_PER_QUERY) {
+    const oldestPageKey = queryPages
+      .map(key => ({ key, accessOrder: cache[key].accessOrder }))
+      .sort((a, b) => a.accessOrder - b.accessOrder)[0].key;
+    
+    delete cache[oldestPageKey];
+  }
+
+  // Calculer le nouvel accessOrder (max actuel + 1)
+  const maxAccessOrder = Object.values(cache).reduce(
+    (max, entry) => Math.max(max, entry.accessOrder || 0),
+    0
+  );
+
+  const key = getCacheKey(query, page);
   cache[key] = {
     query,
     page,
     results,
     totalResults,
     timestamp: Date.now(),
+    accessOrder: maxAccessOrder + 1,
   };
 
+  // Nettoyage global: limiter à 50 entrées totales
   const cacheEntries = Object.values(cache);
   if (cacheEntries.length > 50) {
     const sortedEntries = cacheEntries.sort(

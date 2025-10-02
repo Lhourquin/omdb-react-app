@@ -2,6 +2,7 @@ import "./App.css";
 import { MovieList } from "./components/movie/MovieList";
 import { SearchBar } from "./components/shared/searchbar/SearchBar";
 import { Pagination } from "./components/shared/pagination/Pagination";
+import { PageIndicator } from "./components/shared/page-indicator/PageIndicator";
 import { useMovieSearch } from "./hooks/movie/useMovieSearch";
 
 function App() {
@@ -31,26 +32,32 @@ function App() {
         </div>
 
         {lastSearchQuery && movies.length > 0 && !loading && (
-          <div className="mb-6 text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-lg shadow-sm">
-              <svg
-                className="w-5 h-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-sm font-medium">
-                Résultats pour{" "}
-                <span className="font-bold">"{lastSearchQuery}"</span>
-              </span>
+          <div className="mb-6 flex items-center justify-between animate-fade-in">
+            <PageIndicator currentPage={currentPage} totalPages={totalPages} />
+            
+            <div className="flex-1 flex justify-center">
+              <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-lg shadow-sm">
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">
+                  Résultats pour{" "}
+                  <span className="font-bold">"{lastSearchQuery}"</span>
+                </span>
+              </div>
             </div>
+            
+            <div className="w-[200px]"></div>
           </div>
         )}
 

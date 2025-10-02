@@ -23,8 +23,8 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
 
   return (
     <>
-      <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border border-gray-100">
-        <div className="relative w-full h-80 bg-gray-100 overflow-hidden">
+      <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 cursor-pointer border border-gray-100">
+        <div className="relative w-full h-64 sm:h-80 bg-gray-100 overflow-hidden">
           {hasValidPoster(movie.Poster) ? (
             <img
               src={movie.Poster}
@@ -41,40 +41,41 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
           <div 
             className={`absolute inset-0 flex flex-col items-center justify-center text-gray-500 ${hasValidPoster(movie.Poster) ? 'hidden' : 'flex'}`}
           >
-            <svg className="w-20 h-20 mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-12 h-12 sm:w-20 sm:h-20 mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
             </svg>
-            <span className="text-sm font-medium">Image non disponible</span>
+            <span className="text-xs sm:text-sm font-medium text-center px-2">Image non disponible</span>
           </div>
           
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
             <button
-              className="w-full bg-white text-gray-900 font-semibold px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-white text-gray-900 font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg hover:bg-gray-50 transition-colors shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
               onClick={handleClick}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              Voir les détails
+              <span className="hidden sm:inline">Voir les détails</span>
+              <span className="sm:hidden">Détails</span>
             </button>
           </div>
         </div>
 
-        <div className="p-5">
-          <h3 className="font-bold text-xl mb-2 text-gray-900 line-clamp-2 min-h-[3.5rem]">
+        <div className="p-4 sm:p-5">
+          <h3 className="font-bold text-lg sm:text-xl mb-2 text-gray-900 line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem]">
             {movie.Title}
           </h3>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="inline-flex items-center gap-1 text-gray-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {movie.Year}
             </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 capitalize">
+            <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 capitalize">
               {movie.Type}
             </span>
           </div>

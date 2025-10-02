@@ -10,9 +10,9 @@ interface InfoRowProps {
 }
 
 const InfoRow = ({ label, value }: InfoRowProps) => (
-  <div className="py-3 border-b border-gray-100 last:border-0">
-    <div className="text-sm font-semibold text-gray-500 mb-1">{label}</div>
-    <div className="text-gray-900">{value}</div>
+  <div className="py-2 sm:py-3 border-b border-gray-100 last:border-0">
+    <div className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">{label}</div>
+    <div className="text-sm sm:text-base text-gray-900">{value}</div>
   </div>
 );
 
@@ -43,10 +43,10 @@ export const MovieDetailInformation = ({ movieDetails }: MovieDetailInformationP
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-bold text-gray-900">Informations détaillées</h3>
+      <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900">Informations détaillées</h3>
       </div>
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {validItems.map((item) => (
           <InfoRow
             key={item.key}

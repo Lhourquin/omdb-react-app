@@ -70,12 +70,12 @@ export const Modal = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-black bg-opacity-60 backdrop-blur-sm">
       {/* Modal Content */}
       <div 
         ref={modalRef}
         className={`
-          relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] 
+          relative bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] 
           flex flex-col overflow-hidden transform transition-all duration-300 ease-out
           ${className}
         `}
@@ -86,13 +86,13 @@ export const Modal = ({
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-2xl flex-shrink-0">
-            <h2 id="modal-title" className="text-2xl font-bold text-gray-900 pr-4">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-xl sm:rounded-t-2xl flex-shrink-0">
+            <h2 id="modal-title" className="text-lg sm:text-2xl font-bold text-gray-900 pr-4 truncate">
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-2 transition-all duration-200 text-2xl font-light flex-shrink-0"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-1.5 sm:p-2 transition-all duration-200 text-xl sm:text-2xl font-light flex-shrink-0"
               aria-label="Fermer la modal"
             >
               ×
@@ -102,7 +102,7 @@ export const Modal = ({
         
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto bg-white">
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {children}
           </div>
         </div>

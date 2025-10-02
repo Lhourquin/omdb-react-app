@@ -13,6 +13,12 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
 
+  const handlePageChange = (page: number) => {
+    onPageChange(page);
+    // Scroll smooth vers le haut
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
@@ -58,7 +64,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       {/* Desktop layout - original */}
       <div className="hidden sm:flex items-center gap-2">
         <button
-          onClick={() => onPageChange(currentPage - 1)}
+          onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Page précédente"
@@ -85,7 +91,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             return (
               <button
                 key={pageNumber}
-                onClick={() => onPageChange(pageNumber)}
+                onClick={() => handlePageChange(pageNumber)}
                 className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isCurrentPage
                     ? "bg-blue-600 text-white"
@@ -101,7 +107,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         </div>
 
         <button
-          onClick={() => onPageChange(currentPage + 1)}
+          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Page suivante"
@@ -132,7 +138,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             return (
               <button
                 key={pageNumber}
-                onClick={() => onPageChange(pageNumber)}
+                onClick={() => handlePageChange(pageNumber)}
                 className={`min-w-[36px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isCurrentPage
                     ? "bg-blue-600 text-white"
@@ -150,7 +156,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* Flèches en dessous - plus grosses */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onPageChange(currentPage - 1)}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-2xl font-bold"
             aria-label="Page précédente"
@@ -159,7 +165,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           </button>
 
           <button
-            onClick={() => onPageChange(currentPage + 1)}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-2xl font-bold"
             aria-label="Page suivante"

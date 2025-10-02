@@ -11,6 +11,7 @@ function App() {
     searchHistory,
     lastSearchQuery,
     searchMoviesHook,
+    removeFromHistory,
   } = useMovieSearch();
 
   return (
@@ -20,6 +21,7 @@ function App() {
           <SearchBar
             onSearch={searchMoviesHook}
             searchHistory={searchHistory}
+            onDeleteHistoryItem={removeFromHistory}
           />
         </div>
 

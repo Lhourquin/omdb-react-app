@@ -66,6 +66,10 @@ export const useMovieSearch = () => {
     }
   }, [loader, setSearchHistory]);
 
+  const removeFromHistory = useCallback((queryToRemove: string) => {
+    setSearchHistory((prev) => prev.filter(q => q !== queryToRemove));
+  }, [setSearchHistory]);
+
   useEffect(() => {
     if (searchHistory.length > 0) {
       const lastQuery = searchHistory[0];
@@ -81,5 +85,6 @@ export const useMovieSearch = () => {
     isCachedResult,
     lastSearchQuery,
     searchMoviesHook,
+    removeFromHistory,
   };
 };

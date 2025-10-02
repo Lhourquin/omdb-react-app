@@ -4,12 +4,14 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   placeholder?: string;
   searchHistory?: string[];
+  onDeleteHistoryItem?: (query: string) => void;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   placeholder = "Rechercher un film...",
   searchHistory = [],
+  onDeleteHistoryItem,
 }) => {
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -50,6 +52,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
+  const handleDelete = (e: React.MouseEvent, queryToDelete: string) => {
+    e.stopPropagation();
+    onDeleteHistoryItem?.(queryToDelete);
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -87,22 +94,35 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               </div>
               <div className="py-1">
                 {searchHistory.map((historyQuery, index) => (
-                  <button
+                  <div
                     key={index}
-                    type="button"
-                    onClick={() => handleHistoryClick(historyQuery)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-all flex items-center gap-3 text-gray-700 group"
+                    className="w-full px-4 py-3 hover:bg-gray-50 transition-all flex items-center gap-3 text-gray-700 group"
                   >
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <span className="flex-1 font-medium">{historyQuery}</span>
-                    <svg className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => handleHistoryClick(historyQuery)}
+                      className="flex-1 flex items-center gap-3 text-left"
+                    >
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <span className="flex-1 font-medium">{historyQuery}</span>
+                    </button>
+                    {onDeleteHistoryItem && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(e, historyQuery)}
+                        className="p-1.5 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                        aria-label={`Supprimer "${historyQuery}" de l'historique`}
+                      >
+                        <svg className="w-4 h-4 text-gray-400 hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

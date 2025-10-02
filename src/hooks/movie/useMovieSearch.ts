@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { searchMovies } from "../../services/omdb.service";
 import { getCachedSearch, setCachedSearch } from "../../services/cache.service";
 import type { Movie as MovieType } from "../../types/Movie.type";
@@ -12,9 +12,10 @@ export const useMovieSearch = () => {
   const [movies, setMovies] = useState<MovieType[]>([]);
   const [searchHistory, setSearchHistory] = useLocalStorage<string[]>(SEARCH_HISTORY_KEY, []);
   const [isCachedResult, setIsCachedResult] = useState(false);
+  const [lastSearchQuery, setLastSearchQuery] = useState<string | null>(null);
   const loader = useLoader("Recherche en cours...");
 
-  const searchMoviesHook = useCallback(async (query: string) => {
+  const searchMoviesHook = useCallback(async (query: string, isInitialLoad = false) => {
     if (!query.trim()) return;
 
     const cachedResults = getCachedSearch(query);
@@ -22,11 +23,14 @@ export const useMovieSearch = () => {
     if (cachedResults) {
       setMovies(cachedResults);
       setIsCachedResult(true);
+      setLastSearchQuery(query);
       
-      setSearchHistory((prev) => {
-        const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
-        return newHistory;
-      });
+      if (!isInitialLoad) {
+        setSearchHistory((prev) => {
+          const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
+          return newHistory;
+        });
+      }
       
       return;
     }
@@ -37,13 +41,16 @@ export const useMovieSearch = () => {
     try {
       const results = await searchMovies(query);
       setMovies(results);
+      setLastSearchQuery(query);
       
       setCachedSearch(query, results);
 
-      setSearchHistory((prev) => {
-        const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
-        return newHistory;
-      });
+      if (!isInitialLoad) {
+        setSearchHistory((prev) => {
+          const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
+          return newHistory;
+        });
+      }
 
       loader.stopLoading();
     } catch (error) {
@@ -51,12 +58,20 @@ export const useMovieSearch = () => {
     }
   }, [loader, setSearchHistory]);
 
+  useEffect(() => {
+    if (searchHistory.length > 0) {
+      const lastQuery = searchHistory[0];
+      searchMoviesHook(lastQuery, true);
+    }
+  }, []);
+
   return {
     movies,
     loading: loader.loading,
     error: loader.error,
     searchHistory,
     isCachedResult,
+    lastSearchQuery,
     searchMoviesHook,
   };
 };

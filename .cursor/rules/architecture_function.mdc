@@ -1,0 +1,240 @@
+---
+alwaysApply: true
+---
+
+# Simplified Functional Architecture - OMDb Movie Search App
+
+## Architecture Overview
+Simple, clean functional architecture with clear separation of concerns using only functions, interfaces, and React hooks.
+
+## Simplified Structure
+
+```
+src/
+├── components/          # UI Components
+│   ├── SearchBar.tsx
+│   ├── MovieCard.tsx
+│   ├── MovieList.tsx
+│   ├── MovieDetails.tsx
+│   └── LoadingSpinner.tsx
+├── hooks/              # Custom React Hooks
+│   ├── useMovieSearch.ts
+│   ├── useMovieDetails.ts
+│   └── useSearchHistory.ts
+├── services/           # API and Business Logic
+│   ├── omdbService.ts
+│   └── searchService.ts
+├── types/              # TypeScript Definitions
+│   └── movie.types.ts
+├── utils/              # Utility Functions
+│   └── constants.ts
+└── App.tsx
+```
+
+**Key Principles:**
+- Pure functions only (no classes)
+- Clear separation: UI, Logic, Data
+- OMDb API integration
+- React hooks for state management
+- TypeScript for type safety
+
+## OMDb API Types
+
+```typescript
+// src/types/movie.types.ts
+export interface Movie {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: 'movie' | 'series' | 'episode';
+  Poster: string;
+}
+
+export interface MovieDetail extends Movie {
+  Rated: string;
+  Released: string;
+  Runtime: string;
+  Genre: string;
+  Director: string;
+  Writer: string;
+  Actors: string;
+  Plot: string;
+  Language: string;
+  Country: string;
+  Awards: string;
+  Ratings: { Source: string; Value: string }[];
+  Metascore: string;
+  imdbRating: string;
+  imdbVotes: string;
+  DVD: string;
+  BoxOffice: string;
+  Production: string;
+  Website: string;
+  Response: 'True' | 'False';
+}
+
+export interface OMDbSearchResponse {
+  Search: Movie[];
+  totalResults: string;
+  Response: 'True' | 'False';
+  Error?: string;
+}
+
+export interface SearchState {
+  query: string;
+  results: Movie[];
+  loading: boolean;
+  error: string | null;
+}
+```
+
+## OMDb Service
+
+```typescript
+// src/services/omdbService.ts
+import { Movie, MovieDetail, OMDbSearchResponse } from '../types/movie.types';
+
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://www.omdbapi.com/';
+
+export const searchMovies = async (query: string): Promise<Movie[]> => {
+  const response = await fetch(`${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}`);
+  const data: OMDbSearchResponse = await response.json();
+  
+  if (data.Response === 'False') {
+    throw new Error(data.Error || 'Aucun film trouvé');
+  }
+  
+  return data.Search || [];
+};
+
+export const getMovieDetails = async (imdbID: string): Promise<MovieDetail | null> => {
+  const response = await fetch(`${BASE_URL}?apikey=${API_KEY}&i=${imdbID}`);
+  const data: MovieDetail = await response.json();
+  
+  return data.Response === 'True' ? data : null;
+};
+```
+
+## Business Logic Functions
+
+```typescript
+// src/services/searchService.ts
+export const validateSearchQuery = (query: string): string => {
+  if (!query || query.trim().length < 2) {
+    throw new Error('La requête doit contenir au moins 2 caractères');
+  }
+  return query.trim();
+};
+
+export const hasValidPoster = (poster: string): boolean => 
+  poster && poster !== 'N/A';
+
+export const getDisplayTitle = (title: string, year: string): string => 
+  `${title} (${year})`;
+
+export const formatRuntime = (runtime: string): string => 
+  runtime.replace(' min', ' minutes');
+```
+
+## React Hooks
+
+```typescript
+// src/hooks/useMovieSearch.ts
+import { useState, useCallback } from 'react';
+import { searchMovies } from '../services/omdbService';
+import { validateSearchQuery } from '../services/searchService';
+import { Movie, SearchState } from '../types/movie.types';
+
+export const useMovieSearch = () => {
+  const [state, setState] = useState<SearchState>({
+    query: '',
+    results: [],
+    loading: false,
+    error: null,
+  });
+
+  const search = useCallback(async (query: string) => {
+    if (!query.trim()) return;
+    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const validatedQuery = validateSearchQuery(query);
+      const results = await searchMovies(validatedQuery);
+      setState(prev => ({
+        ...prev,
+        query: validatedQuery,
+        results,
+        loading: false,
+      }));
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        loading: false,
+      }));
+    }
+  }, []);
+
+  return {
+    ...state,
+    search,
+  };
+};
+```
+
+## Component Example
+
+```typescript
+// src/components/MovieCard.tsx
+import { Movie } from '../types/movie.types';
+import { hasValidPoster, getDisplayTitle } from '../services/searchService';
+
+interface MovieCardProps {
+  movie: Movie;
+  onClick: (movie: Movie) => void;
+}
+
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => (
+  <div 
+    className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+    onClick={() => onClick(movie)}
+  >
+    {hasValidPoster(movie.Poster) ? (
+      <img 
+        src={movie.Poster} 
+        alt={movie.Title}
+        className="w-full h-64 object-cover"
+      />
+    ) : (
+      <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
+        <span className="text-gray-500">Aucune image</span>
+      </div>
+    )}
+    <div className="p-4">
+      <h3 className="font-semibold text-lg">{getDisplayTitle(movie.Title, movie.Year)}</h3>
+      <p className="text-gray-600 capitalize">{movie.Type}</p>
+    </div>
+  </div>
+);
+```
+
+## Benefits of Simplified Approach
+
+1. **Practical**: Easy to understand and implement
+2. **Functional**: Pure functions, no classes
+3. **Type-Safe**: Proper TypeScript interfaces for OMDb API
+4. **Testable**: Each function can be tested independently
+5. **Maintainable**: Clear separation of concerns
+6. **Scalable**: Easy to add new features
+
+## Implementation Strategy
+
+1. **Start with types** - Define OMDb API interfaces
+2. **Create services** - API calls and business logic
+3. **Build hooks** - State management and side effects
+4. **Develop components** - UI with Tailwind CSS
+5. **Wire together** - Simple composition in App.tsx
+
+This simplified approach maintains clean architecture while being practical for a technical test.

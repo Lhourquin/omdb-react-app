@@ -1,0 +1,141 @@
+---
+alwaysApply: true
+---
+
+# Frontend Rules - OMDb Movie Search App
+
+## Project Overview
+React + TypeScript movie search application using OMDb API (the documentation of the api as added in documentations tools of cursor) with Vite development server and Tailwind CSS.
+
+## Core Technical Requirements
+
+### React & TypeScript Standards
+- Use React hooks exclusively (no class components)
+- Define proper TypeScript interfaces and types for all data structures
+- Use functional components with proper type annotations
+- Implement proper error boundaries and loading states
+
+### API Integration - OMDb
+- Base URL: `https://www.omdbapi.com/`
+- Search endpoint: `?apikey=YOUR_KEY&s=SEARCH_TERM`
+- Detail endpoint: `?apikey=YOUR_KEY&i=IMDB_ID`
+- Always handle API errors gracefully
+- Implement proper loading states during API calls
+
+### State Management
+- Use `useState` and `useReducer` for local state
+- No Redux or heavy state management libraries
+- Implement proper state for: loading, error, search results, selected movie
+
+### Styling Guidelines
+- Use Tailwind CSS exclusively for styling
+- Follow mobile-first responsive design
+- Implement clean, functional UI without imposed design constraints
+- Use Tailwind utility classes for consistent spacing and colors
+
+## Required Features
+
+### 1. Search Functionality
+```typescript
+interface SearchState {
+  query: string;
+  results: Movie[];
+  loading: boolean;
+  error: string | null;
+}
+```
+
+### 2. Movie Display
+Required movie card fields:
+- Poster image (with fallback for missing images)
+- Title
+- Year
+- Handle click events for detail view
+
+### 3. State Management
+- Loading spinner during API calls
+- Error messages for network issues or "movie not found" (the error message should be in french)
+- Empty state when no results
+
+### 4. Movie Details
+Display in modal or side panel:
+- Synopsis/Plot
+- Director
+- Actors
+- Genre
+- Additional metadata from OMDb API
+
+## TypeScript Interfaces
+
+### OMDb API Types
+```typescript
+interface Movie {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: 'movie' | 'series' | 'episode';
+  Poster: string;
+}
+
+interface MovieDetail extends Movie {
+  Rated: string;
+  Released: string;
+  Runtime: string;
+  Genre: string;
+  Director: string;
+  Writer: string;
+  Actors: string;
+  Plot: string;
+  Language: string;
+  Country: string;
+  Awards: string;
+  Ratings: { Source: string; Value: string }[];
+  Metascore: string;
+  imdbRating: string;
+  imdbVotes: string;
+  DVD: string;
+  BoxOffice: string;
+  Production: string;
+  Website: string;
+  Response: 'True' | 'False';
+}
+
+interface OMDbSearchResponse {
+  Search: Movie[];
+  totalResults: string;
+  Response: 'True' | 'False';
+  Error?: string;
+}
+```
+
+## Bonus Features (Optional)
+- Pagination or infinite scroll for large result sets
+- Local cache using localStorage for search history
+- Unit tests with React Testing Library
+- Debounced search input
+- Keyboard navigation support
+
+## Code Quality Standards
+- Proper component separation and single responsibility
+- Meaningful variable and function names
+- Consistent error handling patterns
+- Proper TypeScript usage with strict mode
+- Clean, readable code structure
+
+## Performance Considerations
+- Implement proper cleanup in useEffect hooks
+- Use React.memo for expensive components when needed
+- Optimize image loading with proper alt text and loading states
+
+## Error Handling
+- Network connectivity issues
+- Invalid API responses
+- Missing movie data
+- Rate limiting from OMDb API
+- Invalid search queries
+
+## Accessibility
+- Proper ARIA labels for interactive elements
+- Keyboard navigation support
+- Screen reader friendly content
+- Focus management in modals/details view

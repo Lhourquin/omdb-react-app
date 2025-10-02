@@ -1,17 +1,17 @@
 import { getItem, setItem } from "./localstorage.service";
 import type { Movie } from "../types/Movie.type";
 
-const CACHE_KEY = "movieSearchCache";
-const CACHE_EXPIRATION_MS = 1000 * 60 * 60; // 1 heure
-const MAX_RESULTS_TO_CACHE = 20;
+export const CACHE_KEY = "movieSearchCache";
+export const CACHE_EXPIRATION_MS = 1000 * 60 * 60; // 1 heure
+export const MAX_RESULTS_TO_CACHE = 20;
 
-interface CacheEntry {
+export interface CacheEntry {
   query: string;
   results: Movie[];
   timestamp: number;
 }
 
-interface SearchCache {
+export interface SearchCache {
   [key: string]: CacheEntry;
 }
 

@@ -4,6 +4,7 @@ import { getCachedSearch, setCachedSearch } from "../../services/cache.service";
 import type { Movie as MovieType } from "../../types/Movie.type";
 import { useLoader } from "../loader/useLoader";
 import { useLocalStorage } from "../localStorage/useLocalStorage";
+import { MovieNotFoundError } from "../../utils/errors";
 
 const SEARCH_HISTORY_KEY = "searchHistory";
 const MAX_HISTORY_SIZE = 10;
@@ -54,7 +55,14 @@ export const useMovieSearch = () => {
 
       loader.stopLoading();
     } catch (error) {
-      loader.setError(error instanceof Error ? error.message : "Erreur de recherche");
+      setMovies([]);
+      setLastSearchQuery(null);
+      
+      if (error instanceof MovieNotFoundError) {
+        loader.setError(error.message);
+      } else {
+        loader.setError(error instanceof Error ? error.message : "Erreur de recherche");
+      }
     }
   }, [loader, setSearchHistory]);
 

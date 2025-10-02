@@ -70,7 +70,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onFocus={handleInputFocus}
             placeholder={placeholder}
-            className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:border-gray-300 transition-all text-lg"
+            className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent shadow-sm hover:border-gray-300 transition-all text-lg"
           />
 
           {showDropdown && searchHistory.length > 0 && (
@@ -91,10 +91,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     key={index}
                     type="button"
                     onClick={() => handleHistoryClick(historyQuery)}
-                    className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all flex items-center gap-3 text-gray-700 group"
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-all flex items-center gap-3 text-gray-700 group"
                   >
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                      <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
@@ -112,7 +112,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <button
           type="submit"
           disabled={!query.trim()}
-          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+          className="px-8 py-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
         >
           Rechercher
         </button>

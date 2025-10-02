@@ -10,10 +10,10 @@ interface InfoRowProps {
 }
 
 const InfoRow = ({ label, value }: InfoRowProps) => (
-  <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-    <td className="py-3 px-4 font-semibold text-gray-700 w-1/3">{label}</td>
-    <td className="py-3 px-4 text-gray-900">{value}</td>
-  </tr>
+  <div className="py-3 border-b border-gray-100 last:border-0">
+    <div className="text-sm font-semibold text-gray-500 mb-1">{label}</div>
+    <div className="text-gray-900">{value}</div>
+  </div>
 );
 
 export const MovieDetailInformation = ({ movieDetails }: MovieDetailInformationProps) => {
@@ -42,22 +42,18 @@ export const MovieDetailInformation = ({ movieDetails }: MovieDetailInformationP
   if (validItems.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
-        <h3 className="text-xl font-bold text-white">Informations détaillées</h3>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900">Informations détaillées</h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto">
-          <tbody>
-            {validItems.map((item) => (
-              <InfoRow
-                key={item.key}
-                label={item.label}
-                value={item.value}
-              />
-            ))}
-          </tbody>
-        </table>
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {validItems.map((item) => (
+          <InfoRow
+            key={item.key}
+            label={item.label}
+            value={item.value}
+          />
+        ))}
       </div>
     </div>
   );

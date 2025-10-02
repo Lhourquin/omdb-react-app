@@ -23,8 +23,8 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
 
   return (
     <>
-      <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer">
-        <div className="relative w-full h-80 bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
+      <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border border-gray-100">
+        <div className="relative w-full h-80 bg-gray-100 overflow-hidden">
           {hasValidPoster(movie.Poster) ? (
             <img
               src={movie.Poster}
@@ -51,7 +51,7 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
           
           <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
             <button
-              className="w-full bg-white text-gray-900 font-semibold px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-white text-gray-900 font-semibold px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors shadow-lg flex items-center justify-center gap-2"
               onClick={handleClick}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
               </svg>
               {movie.Year}
             </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 capitalize">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 capitalize">
               {movie.Type}
             </span>
           </div>

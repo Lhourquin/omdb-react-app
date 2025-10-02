@@ -134,8 +134,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           disabled={!query.trim()}
           className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none text-sm sm:text-base"
         >
-          <span className="hidden sm:inline">Rechercher</span>
-          <span className="sm:hidden">🔍</span>
+          Rechercher
         </button>
       </div>
     </form>

@@ -32,13 +32,13 @@ function App() {
         </div>
 
         {lastSearchQuery && movies.length > 0 && !loading && (
-          <div className="mb-6 flex items-center justify-between animate-fade-in">
+          <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
             <PageIndicator currentPage={currentPage} totalPages={totalPages} />
             
-            <div className="flex-1 flex justify-center">
-              <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-lg shadow-sm">
+            <div className="flex-1 flex justify-center w-full sm:w-auto">
+              <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-3 sm:px-5 py-2 sm:py-3 rounded-lg shadow-sm">
                 <svg
-                  className="w-5 h-5 text-gray-500"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -50,14 +50,14 @@ function App() {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium text-center">
                   Résultats pour{" "}
                   <span className="font-bold">"{lastSearchQuery}"</span>
                 </span>
               </div>
             </div>
             
-            <div className="w-[200px]"></div>
+            <div className="hidden sm:block w-[200px]"></div>
           </div>
         )}
 

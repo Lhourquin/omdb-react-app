@@ -71,7 +71,7 @@ describe('OMDb Service', () => {
       );
 
       const result = await searchMovies('Inception');
-      expect(result).toEqual([mockMovie]);
+      expect(result).toEqual({ movies: [mockMovie], totalResults: 1 });
     });
 
     it('should handle query with special characters', async () => {
@@ -104,7 +104,7 @@ describe('OMDb Service', () => {
       );
 
       const result = await searchMovies('test');
-      expect(result).toEqual([]);
+      expect(result).toEqual({ movies: [], totalResults: 0 });
     });
 
     it('should throw MovieNotFoundError when movie is not found', async () => {
@@ -185,6 +185,55 @@ describe('OMDb Service', () => {
       );
 
       await searchMovies('The Dark Knight');
+    });
+
+    it('should accept page parameter and default to 1', async () => {
+      server.use(
+        http.get('*', ({ request }) => {
+          const url = new URL(request.url);
+          const page = url.searchParams.get('page');
+          expect(page).toBe('1');
+          return HttpResponse.json({
+            Search: [mockMovie],
+            totalResults: '10',
+            Response: 'True',
+          });
+        })
+      );
+
+      await searchMovies('test');
+    });
+
+    it('should use specified page parameter', async () => {
+      server.use(
+        http.get('*', ({ request }) => {
+          const url = new URL(request.url);
+          const page = url.searchParams.get('page');
+          expect(page).toBe('3');
+          return HttpResponse.json({
+            Search: [mockMovie],
+            totalResults: '50',
+            Response: 'True',
+          });
+        })
+      );
+
+      const result = await searchMovies('test', 3);
+      expect(result.totalResults).toBe(50);
+    });
+
+    it('should parse totalResults as integer', async () => {
+      server.use(
+        http.get('*', () => HttpResponse.json({
+          Search: [mockMovie],
+          totalResults: '42',
+          Response: 'True',
+        }))
+      );
+
+      const result = await searchMovies('test');
+      expect(result.totalResults).toBe(42);
+      expect(typeof result.totalResults).toBe('number');
     });
   });
 

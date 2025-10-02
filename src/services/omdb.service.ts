@@ -4,10 +4,18 @@ import type { OMDbSearchResponse } from "../types/Omb.type";
 import { BASE_URL, API_KEY, BASE_URL_POSTER } from "../utils/constants";
 import { NetworkError, ApiError, MovieNotFoundError } from "../utils/errors";
 
-export const searchMovies = async (query: string): Promise<Movie[]> => {
+export interface SearchMoviesResult {
+  movies: Movie[];
+  totalResults: number;
+}
+
+export const searchMovies = async (
+  query: string,
+  page: number = 1
+): Promise<SearchMoviesResult> => {
   try {
     const response = await fetch(
-      `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}`
+      `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}&page=${page}`
     );
 
     if (!response.ok) {
@@ -26,7 +34,10 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
       throw new ApiError(data.Error);
     }
 
-    return data.Search || [];
+    return {
+      movies: data.Search || [],
+      totalResults: parseInt(data.totalResults) || 0,
+    };
   } catch (error) {
     if (error instanceof NetworkError || error instanceof ApiError || error instanceof MovieNotFoundError) {
       throw error;

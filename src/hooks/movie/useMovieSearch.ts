@@ -14,67 +14,95 @@ export const useMovieSearch = () => {
   const [searchHistory, setSearchHistory] = useLocalStorage<string[]>(SEARCH_HISTORY_KEY, []);
   const [isCachedResult, setIsCachedResult] = useState(false);
   const [lastSearchQuery, setLastSearchQuery] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   const loader = useLoader("Recherche en cours...");
 
-  const searchMoviesHook = useCallback(async (query: string, isInitialLoad = false) => {
-    if (!query.trim()) return;
+  const searchMoviesHook = useCallback(
+    async (query: string, page: number = 1, isInitialLoad = false) => {
+      if (!query.trim()) return;
 
-    const cachedResults = getCachedSearch(query);
-    
-    if (cachedResults) {
-      setMovies(cachedResults);
-      setIsCachedResult(true);
-      setLastSearchQuery(query);
-      
-      if (!isInitialLoad) {
-        setSearchHistory((prev) => {
-          const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
-          return newHistory;
-        });
-      }
-      
-      return;
-    }
+      const cachedResults = getCachedSearch(query, page);
 
-    setIsCachedResult(false);
-    loader.startLoading("Recherche en cours...");
-    
-    try {
-      const results = await searchMovies(query);
-      setMovies(results);
-      setLastSearchQuery(query);
-      
-      setCachedSearch(query, results);
+      if (cachedResults) {
+        setMovies(cachedResults.results);
+        setTotalResults(cachedResults.totalResults);
+        setCurrentPage(page);
+        setIsCachedResult(true);
+        setLastSearchQuery(query);
 
-      if (!isInitialLoad) {
-        setSearchHistory((prev) => {
-          const newHistory = [query, ...prev.filter(q => q !== query)].slice(0, MAX_HISTORY_SIZE);
-          return newHistory;
-        });
+        if (!isInitialLoad) {
+          setSearchHistory((prev) => {
+            const newHistory = [query, ...prev.filter((q) => q !== query)].slice(
+              0,
+              MAX_HISTORY_SIZE
+            );
+            return newHistory;
+          });
+        }
+
+        return;
       }
 
-      loader.stopLoading();
-    } catch (error) {
-      setMovies([]);
-      setLastSearchQuery(null);
-      
-      if (error instanceof MovieNotFoundError) {
-        loader.setError(error.message);
-      } else {
-        loader.setError(error instanceof Error ? error.message : "Erreur de recherche");
+      setIsCachedResult(false);
+      loader.startLoading("Recherche en cours...");
+
+      try {
+        const { movies: results, totalResults: total } = await searchMovies(query, page);
+        setMovies(results);
+        setTotalResults(total);
+        setCurrentPage(page);
+        setLastSearchQuery(query);
+
+        setCachedSearch(query, page, results, total);
+
+        if (!isInitialLoad) {
+          setSearchHistory((prev) => {
+            const newHistory = [query, ...prev.filter((q) => q !== query)].slice(
+              0,
+              MAX_HISTORY_SIZE
+            );
+            return newHistory;
+          });
+        }
+
+        loader.stopLoading();
+      } catch (error) {
+        setMovies([]);
+        setTotalResults(0);
+        setCurrentPage(1);
+        setLastSearchQuery(null);
+
+        if (error instanceof MovieNotFoundError) {
+          loader.setError(error.message);
+        } else {
+          loader.setError(
+            error instanceof Error ? error.message : "Erreur de recherche"
+          );
+        }
       }
-    }
-  }, [loader, setSearchHistory]);
+    },
+    [loader, setSearchHistory]
+  );
 
   const removeFromHistory = useCallback((queryToRemove: string) => {
     setSearchHistory((prev) => prev.filter(q => q !== queryToRemove));
     removeCachedSearch(queryToRemove);
   }, [setSearchHistory]);
 
+  const goToPage = useCallback(
+    (page: number) => {
+      if (lastSearchQuery && page > 0) {
+        searchMoviesHook(lastSearchQuery, page);
+      }
+    },
+    [lastSearchQuery, searchMoviesHook]
+  );
+
   useEffect(() => {
     if (searchHistory.length > 0) {
       const lastQuery = searchHistory[0];
-      searchMoviesHook(lastQuery, true);
+      searchMoviesHook(lastQuery, 1, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -86,7 +114,11 @@ export const useMovieSearch = () => {
     searchHistory,
     isCachedResult,
     lastSearchQuery,
+    currentPage,
+    totalResults,
+    totalPages: Math.ceil(totalResults / 10),
     searchMoviesHook,
     removeFromHistory,
+    goToPage,
   };
 };

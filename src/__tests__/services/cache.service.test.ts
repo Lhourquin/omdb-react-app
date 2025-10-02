@@ -33,48 +33,71 @@ describe('Cache Service', () => {
 
   describe('getCachedSearch', () => {
     it('should return null when cache is empty', () => {
-      const result = getCachedSearch('test');
+      const result = getCachedSearch('test', 1);
       expect(result).toBeNull();
     });
 
     it('should return null for non-existent query', () => {
-      setCachedSearch('matrix', mockMovies);
+      setCachedSearch('matrix', 1, mockMovies, 10);
       
-      const result = getCachedSearch('inception');
+      const result = getCachedSearch('inception', 1);
       expect(result).toBeNull();
     });
 
-    it('should return cached results for exact match', () => {
-      setCachedSearch('test', mockMovies);
+    it('should return null for different page', () => {
+      setCachedSearch('test', 1, mockMovies, 20);
       
-      const result = getCachedSearch('test');
-      expect(result).toEqual(mockMovies);
+      const result = getCachedSearch('test', 2);
+      expect(result).toBeNull();
+    });
+
+    it('should return cached results for exact match with page', () => {
+      setCachedSearch('test', 1, mockMovies, 10);
+      
+      const result = getCachedSearch('test', 1);
+      expect(result).toEqual({ results: mockMovies, totalResults: 10 });
+    });
+
+    it('should cache different pages separately', () => {
+      const movies1 = [mockMovie];
+      const movies2 = [{ ...mockMovie, Title: 'Another Movie' }];
+      
+      setCachedSearch('test', 1, movies1, 20);
+      setCachedSearch('test', 2, movies2, 20);
+      
+      const result1 = getCachedSearch('test', 1);
+      const result2 = getCachedSearch('test', 2);
+      
+      expect(result1?.results).toEqual(movies1);
+      expect(result2?.results).toEqual(movies2);
+      expect(result1?.totalResults).toBe(20);
+      expect(result2?.totalResults).toBe(20);
     });
 
     it('should be case-insensitive', () => {
-      setCachedSearch('Matrix', mockMovies);
+      setCachedSearch('Matrix', 1, mockMovies, 10);
       
-      const result = getCachedSearch('matrix');
-      expect(result).toEqual(mockMovies);
+      const result = getCachedSearch('matrix', 1);
+      expect(result).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should trim whitespace from query', () => {
-      setCachedSearch('  Matrix  ', mockMovies);
+      setCachedSearch('  Matrix  ', 1, mockMovies, 10);
       
-      const result = getCachedSearch('matrix');
-      expect(result).toEqual(mockMovies);
+      const result = getCachedSearch('matrix', 1);
+      expect(result).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should return null for expired cache entry', () => {
       const now = Date.now();
       vi.setSystemTime(now);
       
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       // Avancer le temps au-delà de l'expiration
       vi.setSystemTime(now + CACHE_EXPIRATION_MS + 1000);
       
-      const result = getCachedSearch('test');
+      const result = getCachedSearch('test', 1);
       expect(result).toBeNull();
     });
 
@@ -82,98 +105,100 @@ describe('Cache Service', () => {
       const now = Date.now();
       vi.setSystemTime(now);
       
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       // Avancer le temps mais rester dans la période de validité
       vi.setSystemTime(now + CACHE_EXPIRATION_MS - 1000);
       
-      const result = getCachedSearch('test');
-      expect(result).toEqual(mockMovies);
+      const result = getCachedSearch('test', 1);
+      expect(result).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should remove expired entry from cache', () => {
       const now = Date.now();
       vi.setSystemTime(now);
       
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       // Vérifier que l'entrée existe
       const cache = getItem<any>(CACHE_KEY);
-      expect(cache['test']).toBeDefined();
+      expect(cache['test_page1']).toBeDefined();
       
       // Avancer le temps et récupérer (devrait supprimer)
       vi.setSystemTime(now + CACHE_EXPIRATION_MS + 1000);
-      getCachedSearch('test');
+      getCachedSearch('test', 1);
       
       // Vérifier que l'entrée a été supprimée
       const cacheAfter = getItem<any>(CACHE_KEY);
-      expect(cacheAfter['test']).toBeUndefined();
+      expect(cacheAfter['test_page1']).toBeUndefined();
     });
   });
 
   describe('setCachedSearch', () => {
     it('should cache search results correctly', () => {
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       const cache = getItem<any>(CACHE_KEY);
       expect(cache).toBeDefined();
-      expect(cache['test']).toBeDefined();
-      expect(cache['test'].results).toEqual(mockMovies);
-      expect(cache['test'].query).toBe('test');
+      expect(cache['test_page1']).toBeDefined();
+      expect(cache['test_page1'].results).toEqual(mockMovies);
+      expect(cache['test_page1'].query).toBe('test');
+      expect(cache['test_page1'].page).toBe(1);
+      expect(cache['test_page1'].totalResults).toBe(10);
     });
 
     it('should normalize query key (lowercase + trim)', () => {
-      setCachedSearch('  MATRIX  ', mockMovies);
+      setCachedSearch('  MATRIX  ', 1, mockMovies, 10);
       
       const cache = getItem<any>(CACHE_KEY);
-      expect(cache['matrix']).toBeDefined();
-      expect(cache['matrix'].results).toEqual(mockMovies);
+      expect(cache['matrix_page1']).toBeDefined();
+      expect(cache['matrix_page1'].results).toEqual(mockMovies);
     });
 
     it('should store timestamp', () => {
       const now = Date.now();
       vi.setSystemTime(now);
       
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       const cache = getItem<any>(CACHE_KEY);
-      expect(cache['test'].timestamp).toBe(now);
+      expect(cache['test_page1'].timestamp).toBe(now);
     });
 
     it('should not cache results exceeding MAX_RESULTS_TO_CACHE', () => {
       const bigResults = Array(MAX_RESULTS_TO_CACHE + 1).fill(mockMovie);
       
-      setCachedSearch('test', bigResults);
+      setCachedSearch('test', 1, bigResults, 100);
       
-      const result = getCachedSearch('test');
+      const result = getCachedSearch('test', 1);
       expect(result).toBeNull();
     });
 
     it('should cache results at MAX_RESULTS_TO_CACHE limit', () => {
       const maxResults = Array(MAX_RESULTS_TO_CACHE).fill(mockMovie);
       
-      setCachedSearch('test', maxResults);
+      setCachedSearch('test', 1, maxResults, 20);
       
-      const result = getCachedSearch('test');
-      expect(result).toEqual(maxResults);
+      const result = getCachedSearch('test', 1);
+      expect(result).toEqual({ results: maxResults, totalResults: 20 });
     });
 
     it('should update existing cache entry', () => {
       const movies1: Movie[] = [mockMovie];
       const movies2: Movie[] = [{ ...mockMovie, Title: 'Updated' }];
       
-      setCachedSearch('test', movies1);
-      setCachedSearch('test', movies2);
+      setCachedSearch('test', 1, movies1, 10);
+      setCachedSearch('test', 1, movies2, 15);
       
-      const result = getCachedSearch('test');
-      expect(result).toEqual(movies2);
+      const result = getCachedSearch('test', 1);
+      expect(result).toEqual({ results: movies2, totalResults: 15 });
     });
 
     it('should limit cache to 50 entries', () => {
       // Créer 51 entrées
       for (let i = 0; i < 51; i++) {
         vi.setSystemTime(Date.now() + i); // Chaque entrée a un timestamp différent
-        setCachedSearch(`query${i}`, mockMovies);
+        setCachedSearch(`query${i}`, 1, mockMovies, 10);
       }
       
       const cache = getItem<any>(CACHE_KEY);
@@ -184,69 +209,81 @@ describe('Cache Service', () => {
       // Créer 51 entrées avec des timestamps croissants
       for (let i = 0; i < 51; i++) {
         vi.setSystemTime(Date.now() + i * 1000);
-        setCachedSearch(`query${i}`, mockMovies);
+        setCachedSearch(`query${i}`, 1, mockMovies, 10);
       }
       
       const cache = getItem<any>(CACHE_KEY);
       
-      // L'entrée la plus ancienne (query0) devrait être supprimée
-      expect(cache['query0']).toBeUndefined();
+      // L'entrée la plus ancienne (query0_page1) devrait être supprimée
+      expect(cache['query0_page1']).toBeUndefined();
       
-      // L'entrée la plus récente (query50) devrait être présente
-      expect(cache['query50']).toBeDefined();
+      // L'entrée la plus récente (query50_page1) devrait être présente
+      expect(cache['query50_page1']).toBeDefined();
     });
 
     it('should handle empty results array', () => {
-      setCachedSearch('test', []);
+      setCachedSearch('test', 1, [], 0);
       
-      const result = getCachedSearch('test');
-      expect(result).toEqual([]);
+      const result = getCachedSearch('test', 1);
+      expect(result).toEqual({ results: [], totalResults: 0 });
     });
   });
 
   describe('removeCachedSearch', () => {
-    it('should remove specific cache entry', () => {
-      setCachedSearch('test1', mockMovies);
-      setCachedSearch('test2', mockMovies);
+    it('should remove specific cache entry with page', () => {
+      setCachedSearch('test1', 1, mockMovies, 10);
+      setCachedSearch('test2', 1, mockMovies, 10);
       
-      removeCachedSearch('test1');
+      removeCachedSearch('test1', 1);
       
-      expect(getCachedSearch('test1')).toBeNull();
-      expect(getCachedSearch('test2')).toEqual(mockMovies);
+      expect(getCachedSearch('test1', 1)).toBeNull();
+      expect(getCachedSearch('test2', 1)).toEqual({ results: mockMovies, totalResults: 10 });
+    });
+
+    it('should remove all pages for a query when page is not specified', () => {
+      setCachedSearch('test', 1, mockMovies, 20);
+      setCachedSearch('test', 2, mockMovies, 20);
+      setCachedSearch('other', 1, mockMovies, 10);
+      
+      removeCachedSearch('test');
+      
+      expect(getCachedSearch('test', 1)).toBeNull();
+      expect(getCachedSearch('test', 2)).toBeNull();
+      expect(getCachedSearch('other', 1)).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should handle removing non-existent entry', () => {
       expect(() => {
-        removeCachedSearch('nonExistent');
+        removeCachedSearch('nonExistent', 1);
       }).not.toThrow();
     });
 
     it('should handle removing from empty cache', () => {
       expect(() => {
-        removeCachedSearch('test');
+        removeCachedSearch('test', 1);
       }).not.toThrow();
     });
 
     it('should normalize query key when removing', () => {
-      setCachedSearch('Matrix', mockMovies);
+      setCachedSearch('Matrix', 1, mockMovies, 10);
       
-      removeCachedSearch('  MATRIX  ');
+      removeCachedSearch('  MATRIX  ', 1);
       
-      expect(getCachedSearch('matrix')).toBeNull();
+      expect(getCachedSearch('matrix', 1)).toBeNull();
     });
   });
 
   describe('clearSearchCache', () => {
     it('should clear all cache entries', () => {
-      setCachedSearch('test1', mockMovies);
-      setCachedSearch('test2', mockMovies);
-      setCachedSearch('test3', mockMovies);
+      setCachedSearch('test1', 1, mockMovies, 10);
+      setCachedSearch('test2', 1, mockMovies, 10);
+      setCachedSearch('test3', 1, mockMovies, 10);
       
       clearSearchCache();
       
-      expect(getCachedSearch('test1')).toBeNull();
-      expect(getCachedSearch('test2')).toBeNull();
-      expect(getCachedSearch('test3')).toBeNull();
+      expect(getCachedSearch('test1', 1)).toBeNull();
+      expect(getCachedSearch('test2', 1)).toBeNull();
+      expect(getCachedSearch('test3', 1)).toBeNull();
     });
 
     it('should handle clearing empty cache', () => {
@@ -256,7 +293,7 @@ describe('Cache Service', () => {
     });
 
     it('should create empty cache object', () => {
-      setCachedSearch('test', mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
       
       clearSearchCache();
       
@@ -268,17 +305,17 @@ describe('Cache Service', () => {
   describe('Integration scenarios', () => {
     it('should handle complete cache lifecycle', () => {
       // Set
-      setCachedSearch('test', mockMovies);
-      expect(getCachedSearch('test')).toEqual(mockMovies);
+      setCachedSearch('test', 1, mockMovies, 10);
+      expect(getCachedSearch('test', 1)).toEqual({ results: mockMovies, totalResults: 10 });
       
       // Update
       const updatedMovies = [{ ...mockMovie, Title: 'Updated' }];
-      setCachedSearch('test', updatedMovies);
-      expect(getCachedSearch('test')).toEqual(updatedMovies);
+      setCachedSearch('test', 1, updatedMovies, 15);
+      expect(getCachedSearch('test', 1)).toEqual({ results: updatedMovies, totalResults: 15 });
       
       // Remove
-      removeCachedSearch('test');
-      expect(getCachedSearch('test')).toBeNull();
+      removeCachedSearch('test', 1);
+      expect(getCachedSearch('test', 1)).toBeNull();
     });
 
     it('should handle multiple concurrent cache entries', () => {
@@ -286,48 +323,48 @@ describe('Cache Service', () => {
       const movies2 = [{ ...mockMovie, imdbID: 'tt2' }];
       const movies3 = [{ ...mockMovie, imdbID: 'tt3' }];
       
-      setCachedSearch('query1', movies1);
-      setCachedSearch('query2', movies2);
-      setCachedSearch('query3', movies3);
+      setCachedSearch('query1', 1, movies1, 10);
+      setCachedSearch('query2', 1, movies2, 10);
+      setCachedSearch('query3', 1, movies3, 10);
       
-      expect(getCachedSearch('query1')).toEqual(movies1);
-      expect(getCachedSearch('query2')).toEqual(movies2);
-      expect(getCachedSearch('query3')).toEqual(movies3);
+      expect(getCachedSearch('query1', 1)).toEqual({ results: movies1, totalResults: 10 });
+      expect(getCachedSearch('query2', 1)).toEqual({ results: movies2, totalResults: 10 });
+      expect(getCachedSearch('query3', 1)).toEqual({ results: movies3, totalResults: 10 });
     });
 
     it('should handle mixed operations', () => {
-      setCachedSearch('keep1', mockMovies);
-      setCachedSearch('keep2', mockMovies);
-      setCachedSearch('remove', mockMovies);
+      setCachedSearch('keep1', 1, mockMovies, 10);
+      setCachedSearch('keep2', 1, mockMovies, 10);
+      setCachedSearch('remove', 1, mockMovies, 10);
       
-      removeCachedSearch('remove');
+      removeCachedSearch('remove', 1);
       
-      expect(getCachedSearch('keep1')).toEqual(mockMovies);
-      expect(getCachedSearch('keep2')).toEqual(mockMovies);
-      expect(getCachedSearch('remove')).toBeNull();
+      expect(getCachedSearch('keep1', 1)).toEqual({ results: mockMovies, totalResults: 10 });
+      expect(getCachedSearch('keep2', 1)).toEqual({ results: mockMovies, totalResults: 10 });
+      expect(getCachedSearch('remove', 1)).toBeNull();
     });
   });
 
   describe('Edge cases', () => {
     it('should handle very long query strings', () => {
       const longQuery = 'a'.repeat(1000);
-      setCachedSearch(longQuery, mockMovies);
+      setCachedSearch(longQuery, 1, mockMovies, 10);
       
-      expect(getCachedSearch(longQuery)).toEqual(mockMovies);
+      expect(getCachedSearch(longQuery, 1)).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should handle special characters in query', () => {
       const specialQuery = 'test@#$%^&*()[]{}';
-      setCachedSearch(specialQuery, mockMovies);
+      setCachedSearch(specialQuery, 1, mockMovies, 10);
       
-      expect(getCachedSearch(specialQuery)).toEqual(mockMovies);
+      expect(getCachedSearch(specialQuery, 1)).toEqual({ results: mockMovies, totalResults: 10 });
     });
 
     it('should handle unicode characters in query', () => {
       const unicodeQuery = '测试 тест テスト';
-      setCachedSearch(unicodeQuery, mockMovies);
+      setCachedSearch(unicodeQuery, 1, mockMovies, 10);
       
-      expect(getCachedSearch(unicodeQuery)).toEqual(mockMovies);
+      expect(getCachedSearch(unicodeQuery, 1)).toEqual({ results: mockMovies, totalResults: 10 });
     });
   });
 });

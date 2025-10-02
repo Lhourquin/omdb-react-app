@@ -1,6 +1,7 @@
 import "./App.css";
 import { MovieList } from "./components/movie/MovieList";
 import { SearchBar } from "./components/shared/searchbar/SearchBar";
+import { Pagination } from "./components/shared/pagination/Pagination";
 import { useMovieSearch } from "./hooks/movie/useMovieSearch";
 
 function App() {
@@ -10,8 +11,12 @@ function App() {
     error,
     searchHistory,
     lastSearchQuery,
+    currentPage,
+    totalPages,
+    totalResults,
     searchMoviesHook,
     removeFromHistory,
+    goToPage,
   } = useMovieSearch();
 
   return (
@@ -50,6 +55,15 @@ function App() {
         )}
 
         <MovieList movies={movies} loading={loading} error={error} />
+
+        {movies.length > 0 && !loading && !error && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalResults={totalResults}
+            onPageChange={goToPage}
+          />
+        )}
       </div>
     </div>
   );

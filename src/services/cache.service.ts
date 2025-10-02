@@ -7,7 +7,9 @@ export const MAX_RESULTS_TO_CACHE = 20;
 
 export interface CacheEntry {
   query: string;
+  page: number;
   results: Movie[];
+  totalResults: number;
   timestamp: number;
 }
 
@@ -15,39 +17,52 @@ export interface SearchCache {
   [key: string]: CacheEntry;
 }
 
-const getCacheKey = (query: string): string => {
-  return query.toLowerCase().trim();
+const getCacheKey = (query: string, page: number): string => {
+  return `${query.toLowerCase().trim()}_page${page}`;
 };
 
-export const getCachedSearch = (query: string): Movie[] | null => {
+export const getCachedSearch = (
+  query: string,
+  page: number
+): { results: Movie[]; totalResults: number } | null => {
   const cache = getItem<SearchCache>(CACHE_KEY);
   if (!cache) return null;
 
-  const key = getCacheKey(query);
+  const key = getCacheKey(query, page);
   const entry = cache[key];
 
   if (!entry) return null;
 
   const isExpired = Date.now() - entry.timestamp > CACHE_EXPIRATION_MS;
   if (isExpired) {
-    removeCachedSearch(query);
+    removeCachedSearch(query, page);
     return null;
   }
 
-  return entry.results;
+  return {
+    results: entry.results,
+    totalResults: entry.totalResults,
+  };
 };
 
-export const setCachedSearch = (query: string, results: Movie[]): void => {
+export const setCachedSearch = (
+  query: string,
+  page: number,
+  results: Movie[],
+  totalResults: number
+): void => {
   if (results.length > MAX_RESULTS_TO_CACHE) {
     return;
   }
 
   const cache = getItem<SearchCache>(CACHE_KEY) || {};
-  const key = getCacheKey(query);
+  const key = getCacheKey(query, page);
 
   cache[key] = {
     query,
+    page,
     results,
+    totalResults,
     timestamp: Date.now(),
   };
 
@@ -58,7 +73,7 @@ export const setCachedSearch = (query: string, results: Movie[]): void => {
     );
     const newCache: SearchCache = {};
     sortedEntries.slice(0, 50).forEach((entry) => {
-      newCache[getCacheKey(entry.query)] = entry;
+      newCache[getCacheKey(entry.query, entry.page)] = entry;
     });
     setItem(CACHE_KEY, newCache);
   } else {
@@ -66,12 +81,21 @@ export const setCachedSearch = (query: string, results: Movie[]): void => {
   }
 };
 
-export const removeCachedSearch = (query: string): void => {
+export const removeCachedSearch = (query: string, page?: number): void => {
   const cache = getItem<SearchCache>(CACHE_KEY);
   if (!cache) return;
 
-  const key = getCacheKey(query);
-  delete cache[key];
+  if (page !== undefined) {
+    const key = getCacheKey(query, page);
+    delete cache[key];
+  } else {
+    Object.keys(cache).forEach((key) => {
+      if (cache[key].query.toLowerCase().trim() === query.toLowerCase().trim()) {
+        delete cache[key];
+      }
+    });
+  }
+  
   setItem(CACHE_KEY, cache);
 };
 

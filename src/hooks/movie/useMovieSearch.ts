@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { searchMovies } from "../../services/omdb.service";
-import { getCachedSearch, setCachedSearch } from "../../services/cache.service";
+import { getCachedSearch, setCachedSearch, removeCachedSearch } from "../../services/cache.service";
 import type { Movie as MovieType } from "../../types/Movie.type";
 import { useLoader } from "../loader/useLoader";
 import { useLocalStorage } from "../localStorage/useLocalStorage";
@@ -68,6 +68,7 @@ export const useMovieSearch = () => {
 
   const removeFromHistory = useCallback((queryToRemove: string) => {
     setSearchHistory((prev) => prev.filter(q => q !== queryToRemove));
+    removeCachedSearch(queryToRemove);
   }, [setSearchHistory]);
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export const useMovieSearch = () => {
       const lastQuery = searchHistory[0];
       searchMoviesHook(lastQuery, true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

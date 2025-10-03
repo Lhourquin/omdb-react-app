@@ -58,7 +58,7 @@ Le développement de cette application a été réalisé en collaboration avec l
 
 **1. Analyse et cadrage initial**
 - Lecture approfondie du PDF de spécifications OMDb API
-- Création de règles personnalisées (`frontend.mdc`, `architecture_function`) pour encadrer l'IA et maintenir la cohérence architecturale
+- Création de règles personnalisées (`frontend.mdc`, `architecture_function.mdc`) pour encadrer l'IA et maintenir la cohérence architecturale
 - Définition de contraintes strictes pour éviter les dérives de périmètre
 
 **2. Conception architecturale**

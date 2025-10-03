@@ -9,7 +9,7 @@ Application React de recherche de films utilisant l'API OMDb.
 - Node.js (version 22 ou supérieure)
 - npm (version 10)
 - Définir les variables d'environnement nécéssaire (voir `.env.example`)
-- Une clé api omdb à générer (cliquer sur ce lien : [omb](https://www.omdbapi.com/apikey.aspx))
+- Une clé api omdb à générer (cliquer ici pour [générer la clé api](https://www.omdbapi.com/apikey.aspx))
 
 ### Installation
 
@@ -126,3 +126,7 @@ Le développement de cette application a été réalisé en collaboration avec l
 - **Tests** : Tests d'intégration avec Cypress/Playwright
 - **Monitoring** : Ajout d'analytics et de monitoring d'erreurs (Sentry)
 - **Architecture** : Découplage API via interfaces et mappers - permettrait d'utiliser TMDB, IMDb ou autres APIs sans modifier la logique métier
+- **Configuration** :
+  - Améliorer `tsconfig.json` avec path mapping pour des imports plus propres (`@/components`, `@/services`, `@/types`)
+  - Ajouter `baseUrl` et `paths` pour éviter les imports relatifs profonds (`../../../`)
+  - Configurer des alias pour les dossiers principaux et améliorer l'expérience développeur

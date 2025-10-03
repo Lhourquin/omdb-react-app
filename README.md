@@ -52,21 +52,38 @@ npm run preview
 
 ## Choix techniques
 
+### Méthodologie de développement avec IA
+
+Le développement de cette application a été réalisé en collaboration avec l'IA (Cursor) selon une approche méthodique :
+
+**1. Analyse et cadrage initial**
+- Lecture approfondie du PDF de spécifications OMDb API
+- Création de règles personnalisées (`frontend.mdc`, `architecture_function`) pour encadrer l'IA et maintenir la cohérence architecturale
+- Définition de contraintes strictes pour éviter les dérives de périmètre
+
+**2. Conception architecturale**
+- Réflexion préalable sur l'architecture fonctionnelle avec séparation claire des responsabilités
+- Découplage maximal : services API, logique métier, hooks React, et composants UI isolés
+
+**3. Développement itératif**
+- Implémentation progressive par couches (types → services → hooks → composants)
+- Utilisation de l'IA pour la génération de code respectant les patterns établis
+- Révisions continues pour maintenir la qualité et la cohérence du code
+
 ### Architecture
 - **Architecture fonctionnelle** : Utilisation exclusive de fonctions pures et de hooks React, sans classes
 - **Séparation des responsabilités** : Structure claire avec dossiers `components/`, `hooks/`, `services/`, `types/` et `utils/`
 - **Gestion d'état locale** : Hooks personnalisés (`useMovieSearch`, `useMovieDetails`) avec `useState` et `useLocalStorage`
 
 ### Stack technique
-- **React 19** avec TypeScript strict
+- **React 19** avec TypeScript 
 - **Vite** comme bundler et serveur de développement
-- **React Compiler** activé pour l'optimisation automatique
 - **Tailwind CSS** pour le styling avec approche mobile-first (via cdn)
 - **Vitest** pour les tests unitaires avec couverture de code 
 
 ### API et données
 - **OMDb API** pour la recherche et les détails de films
-- **Cache intelligent** : Système de cache en mémoire avec localStorage pour l'historique
+- **Cache** : Système de cache en mémoire avec localStorage pour l'historique
 - **Gestion d'erreurs** : Classes d'erreurs personnalisées (`NetworkError`, `ApiError`, `MovieNotFoundError`)
 - **Pagination** : Support complet de la pagination OMDb avec persistance de la page courante
 

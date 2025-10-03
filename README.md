@@ -67,7 +67,7 @@ npm run preview
 ### API et données
 - **OMDb API** pour la recherche et les détails de films
 - **Cache intelligent** : Système de cache en mémoire avec localStorage pour l'historique
-- **Gestion d'erreurs ** : Classes d'erreurs personnalisées (`NetworkError`, `ApiError`, `MovieNotFoundError`)
+- **Gestion d'erreurs** : Classes d'erreurs personnalisées (`NetworkError`, `ApiError`, `MovieNotFoundError`)
 - **Pagination** : Support complet de la pagination OMDb avec persistance de la page courante
 
 ### Fonctionnalités avancées
@@ -86,7 +86,6 @@ npm run preview
 ### Améliorations possibles
 - **Sécurité** : Déplacer l'API key côté serveur avec un proxy
 - **Performance** : Ajouter React.memo, useMemo et useCallback pour optimiser les re-renders
-- **UX** : Implémenter un debounce sur la recherche (300-500ms)
 - **Accessibilité** : Ajouter plus d'ARIA labels, support clavier complet, focus management
 - **Fonctionnalités** : Filtres avancés, favoris, comparaison de films, recommandations
 - **PWA** : Service worker pour le mode hors-ligne complet

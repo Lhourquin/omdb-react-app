@@ -6,7 +6,7 @@ Application React de recherche de films utilisant l'API OMDb.
 
 ### Prérequis
 - Node.js (version 22 ou supérieure)
-- npm
+- npm (version 10)
 
 ### Installation
 ```bash

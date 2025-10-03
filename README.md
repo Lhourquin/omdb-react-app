@@ -9,7 +9,7 @@ Application React de recherche de films utilisant l'API OMDb.
 - Node.js (version 22 ou supérieure)
 - npm (version 10)
 - Définir les variables d'environnement nécéssaire (voir `.env.example`)
-- Une clé api omdb à générer (cliquer sur ce lien : [omb]('https://www.omdbapi.com/apikey.aspx'))
+- Une clé api omdb à générer (cliquer sur ce lien : [omb](https://www.omdbapi.com/apikey.aspx))
 
 ### Installation
 

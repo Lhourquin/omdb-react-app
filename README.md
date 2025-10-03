@@ -90,9 +90,8 @@ Le développement de cette application a été réalisé en collaboration avec l
 ### Fonctionnalités avancées
 - **Historique de recherche** : Sauvegarde automatique des 10 dernières recherches
 - **Cache de résultats** : Évite les appels API redondants
-- **Mode hors-ligne** : Persistance des données de recherche
 - **Interface responsive** : Design adaptatif avec Tailwind CSS
-- **Tests complets** : Couverture des services, hooks et utilitaires avec MSW pour le mocking
+- **Tests** : Couverture des services, hook useLoader et utilitaires avec MSW pour le mocking
 
 ## Améliorations possibles
 
